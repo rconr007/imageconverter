@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to SVG Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md w-96">
+        <h1 class="text-2xl font-bold mb-4 text-center">Image to SVG Converter</h1>
+        <form id="uploadForm" class="space-y-4">
+            <div>
+                <label for="image" class="block text-sm font-medium text-gray-700">Select an image (JPG, PNG, JPEG)</label>
+                <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png" required
+                       class="mt-1 block w-full text-sm text-gray-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-full file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-blue-50 file:text-blue-700
+                              hover:file:bg-blue-100">
+            </div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Convert to SVG
+            </button>
+        </form>
+        <div id="result" class="mt-4"></div>
+    </div>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Converting...';
+
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Conversion failed');
+
+                const svgBlob = await response.blob();
+                const svgUrl = URL.createObjectURL(svgBlob);
+
+                resultDiv.innerHTML = `
+                    <p class="text-green-600 mb-2">Conversion successful!</p>
+                    <a href="${svgUrl}" download="converted.svg" class="block w-full text-center bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">
+                        Download SVG
+                    </a>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<p class="text-red-600">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
+
